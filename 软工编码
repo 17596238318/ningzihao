@@ -1,0 +1,106 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+// 生成随机数
+int generateRandomNumber(int max_num, bool use_decimal) {
+    if (use_decimal) {
+        double random = (double)rand() / RAND_MAX;
+        return 1 + rand() % max_num + random;
+    }
+    return 1 + rand() % max_num;
+}
+
+// 生成四则运算
+string generateOperation(vector<char>& operators, int max_num, bool use_decimal) {
+    int num1 = generateRandomNumber(max_num, use_decimal);
+    int num2 = generateRandomNumber(max_num, use_decimal);
+    char op = operators[rand() % operators.size()];
+
+    if (op == '/' && num2 == 0) {
+        num2 = 1; // 避免除数为零
+    }
+
+    string operation = to_string(num1) + " " + op + " " + to_string(num2) + " = ";
+    return operation;
+}
+
+// 生成练习题
+vector<string> generateExercises(int num_exercises, vector<char>& operators, int max_num, bool use_decimal) {
+    vector<string> exercises;
+    for (int i = 0; i < num_exercises; ++i) {
+        exercises.push_back(generateOperation(operators, max_num, use_decimal));
+    }
+    return exercises;
+}
+
+// 输出练习题
+void printExercises(vector<string>& exercises) {
+    cout << "\n生成的练习题如下：" << endl;
+    for (const string& exercise : exercises) {
+        cout << exercise << endl;
+    }
+}
+
+// 输出到文件
+void outputToFile(vector<string>& exercises, string filename) {
+    ofstream file(filename);
+    if (file.is_open()) {
+        for (const string& exercise : exercises) {
+            file << exercise << endl;
+        }
+        cout << "练习题已保存到文件 " << filename << " 中。" << endl;
+    }
+    else {
+        cout << "无法打开文件 " << filename << " 进行写入。" << endl;
+    }
+}
+
+int main() {
+    srand(time(0)); // 设置随机种子
+
+    cout << "欢迎使用四则运算练习生成器！" << endl;
+
+    int num_exercises;
+    cout << "请输入题目数量：";
+    cin >> num_exercises;
+
+    vector<char> operators;
+    cout << "请选择运算符（+ - * /），用空格分隔：";
+    char op;
+    while (cin >> op) {
+        operators.push_back(op);
+        if (cin.peek() == '\n') break; // 如果输入了换行，则停止读取运算符
+    }
+
+    int max_num;
+    cout << "请输入最大数：";
+    cin >> max_num;
+
+    string use_decimal_str;
+    cout << "是否使用小数？(是/否)：";
+    cin >> use_decimal_str;
+    bool use_decimal = (use_decimal_str == "是");
+
+    vector<string> exercises = generateExercises(num_exercises, operators, max_num, use_decimal);
+
+    printExercises(exercises);
+
+    string output_choice;
+    cout << "\n请选择输出方式（1. 输出到控制台；2. 输出到文件）：";
+    cin >> output_choice;
+
+    if (output_choice == "2") {
+        string filename;
+        cout << "请输入文件名：";
+        cin >> filename;
+        outputToFile(exercises, filename);
+    }
+
+    return 0;
+}
